@@ -83,7 +83,7 @@ Web technologies, however, already have established packages for geospatial tool
 
 While `stdWebView` doesn't fix VBA project ergonomics, it moves the UI code which is hard in VBA, to HTML/JS providing significantly greater flexibility, and the ability to use custom libraries written by other developers. The VBA side ultimately becomes a bridge of bindings to the data model, rather than operating the whole vision.
 
-![Geospatial Map Demo](./src/examples/2.%20Geospatial%20Map/demo/Demo.mp4)
+![Geospatial Map Demo](./case-studies/01-geospatial-map/geospatial-demo.mp4)
 
 ### List object viewer
 
@@ -91,7 +91,7 @@ One of the main reasons people build UserForms in VBA is to display and edit str
 
 Our list object viewer case study is a simple example of that: open a UserForm, step through rows in an Excel table, and a `stdWebView` panel shows that row's employee details plus the next steps linked to them. The same screen in pure VBA would be tedious to build, a headache to maintain and provide a poorer user experience.
 
-![List object demo](./src/examples/1.%20ListObjectViewer/Example-1/demo/Demo.mp4)
+![List object demo](./case-studies/02-list-object-viewer/loviewer-demo.gif)
 
 ### Customising existing organisation webapps
 
@@ -101,16 +101,22 @@ SharePoint is a typical example of this, with lists, files, and permissions that
 
 A `stdWebView` UserForm can sit in the gap. The user signs in to the real web app inside the control; you reuse that session (for example via cookies) to call the same APIs and pages the browser would, on their behalf. Or you skip deep integration and simply host a small HTML UI that wraps a narrow task with extra buttons, validation, or a wizard. These controls can be integrated into the host application, retaining the feeling like they're part of the tool they already use.
 
+[Link to project](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/4.%20Sharepoint%20Updator)
+
 ![Sharepoint Updator](TODO:...)
 ![Powerline Example](TODO:...)
 
 ### Data flows driven by node editors
 
-When it comes to rendering VBA tends to offer strict controls that always draw the same kind of UI, and rarely do they allow truly custom looking UI to be created. Although it is possible to use GDI32[<sup>[12]</sup>](#ref-12 "GDI32 reference") or GDI+[<sup>[13]</sup>](#ref-13 "GDI+ reference") libraries targetting a hwnd to draw custom UI on top of a VBA userform, this tends to be convoluted and requires deep knowledge of the stacks in question. Additionally, if what you are rendering requires shaders, both GDI and GDI+ are a no-go, and the only viable alternative for anything close to GPU processing is OpenCL, yet another convoluted library to understand and execute under.
+When it comes to rendering VBA tends to offer strict controls that always draw the same kind of UI, and rarely do they allow truly custom looking UI to be created. Although it is possible to use GDI32[<sup>[12]</sup>](#ref-12 "GDI32 reference") or GDI+[<sup>[13]</sup>](#ref-13 "GDI+ reference") libraries targetting a hwnd to draw custom UI on top of a VBA userform, this tends to be convoluted and requires deep knowledge of the stacks in question. Additionally, if what you are rendering requires shaders, both GDI and GDI+ are a no-go, and the only viable alternative for anything close to GPU processing is OpenCL or DirectX, both of which are convoluted libraries with steep learning curves.
 
 Our pipeline editor case study shows how a webview could give users a low-code way to build data pipelines. Instead of trying to recreate a complex visual editor in native VBA controls, the interface can offer the kind of polished interactions people already expect from websites, from context-aware actions and searchable node insertion through to expression intellisense from table/file metadata.
 
 That richer experience comes from using HTML5, CSS, and JavaScript libraries for the frontend while keeping data persistence, business logic, and side-effects in VBA via `stdWebView`'s interoperability layer. The result is a more approachable and maintainable way to build dataflows than would be practical with VBA forms alone.
+
+[Link to project](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/5.%20Data%20Pipelines)
+
+![Pipelines editor](./case-studies/04-data-pipelines/pipeline-demo.mp4)
 
 ### Benefits and trade-offs
 
