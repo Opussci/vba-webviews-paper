@@ -4,6 +4,8 @@ import { marked } from "marked";
 const sourcePath = new URL("../README.MD", import.meta.url);
 const outputPath = new URL("../docs/index.html", import.meta.url);
 const outputPathLabel = "docs/index.html";
+const repoRootPath = new URL("../", import.meta.url);
+const docsRootPath = new URL("../docs/", import.meta.url);
 
 function extractTitle(markdown: string): string {
   const headingMatch = markdown.match(/^#\s+(.+)$/m);
@@ -11,22 +13,6 @@ function extractTitle(markdown: string): string {
     return headingMatch[1].replace(/`/g, "").trim();
   }
   return "Project Documentation";
-}
-
-function rewriteRelativeUrl(url: string | null | undefined): string | null | undefined {
-  if (!url || url.startsWith("#") || /^[a-z]+:/i.test(url) || url.startsWith("//")) {
-    return url;
-  }
-
-  if (url.startsWith("./")) {
-    return `../${url.slice(2)}`;
-  }
-
-  if (url.startsWith("/")) {
-    return `..${url}`;
-  }
-
-  return `../${url}`;
 }
 
 function escapeHtml(text: string | null | undefined): string {
@@ -51,6 +37,28 @@ async function buildDocs(): Promise<void> {
   const markdown = await Bun.file(sourcePath).text();
   const title = extractTitle(markdown);
   let hasMermaidBlocks = false;
+  const assetsToCopy = new Map<string, { source: URL; destination: URL }>();
+
+  const rewriteLocalUrl = (rawUrl: string | null | undefined): string | null | undefined => {
+    if (!rawUrl || rawUrl.startsWith("#") || /^[a-z]+:/i.test(rawUrl) || rawUrl.startsWith("//")) {
+      return rawUrl;
+    }
+
+    const [pathPart, suffix = ""] = rawUrl.split(/([?#].*)/, 2);
+    const sourceAssetUrl = new URL(pathPart, sourcePath);
+    if (!sourceAssetUrl.href.startsWith(repoRootPath.href)) {
+      return rawUrl;
+    }
+
+    const repoRelativePath = decodeURIComponent(sourceAssetUrl.href.slice(repoRootPath.href.length));
+    const outputAssetUrl = new URL(repoRelativePath, docsRootPath);
+    assetsToCopy.set(outputAssetUrl.href, {
+      source: sourceAssetUrl,
+      destination: outputAssetUrl
+    });
+
+    return `./${repoRelativePath}${suffix}`;
+  };
 
   marked.setOptions({
     gfm: true,
@@ -63,7 +71,7 @@ async function buildDocs(): Promise<void> {
   const baseCodeRenderer = renderer.code.bind(renderer);
 
   renderer.image = ({ href, title: imageTitle, text }) => {
-    const rewrittenHref = rewriteRelativeUrl(href);
+    const rewrittenHref = rewriteLocalUrl(href);
 
     if (!isVideoAsset(rewrittenHref)) {
       return baseImageRenderer({
@@ -81,7 +89,7 @@ async function buildDocs(): Promise<void> {
 
   renderer.link = ({ href, title: linkTitle, text, tokens }) =>
     baseLinkRenderer({
-      href: rewriteRelativeUrl(href),
+      href: rewriteLocalUrl(href),
       title: linkTitle,
       text,
       tokens
@@ -175,6 +183,12 @@ ${mermaidScript}
 `;
 
   await Bun.write(outputPath, fullHtml);
+  for (const { source, destination } of assetsToCopy.values()) {
+    const sourceFile = Bun.file(source);
+    if (await sourceFile.exists()) {
+      await Bun.write(destination, sourceFile);
+    }
+  }
   console.log(`Built ${outputPathLabel}`);
 }
 
