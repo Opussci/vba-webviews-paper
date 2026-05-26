@@ -14,6 +14,12 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.6;
       padding: 2rem 1rem;
+      background:rgb(25, 29, 34);
+      color: #e6edf3;
+    }
+
+    a {
+      color: #7cc7ff;
     }
 
     main {
@@ -45,6 +51,54 @@
       font-family: Consolas, "Courier New", monospace;
     }
 
+    :not(pre) > code {
+      padding: 0.14rem 0.36rem;
+      border-radius: 6px;
+      border: 1px solid rgba(127, 127, 127, 0.35);
+      background: rgba(127, 127, 127, 0.18);
+      font-size: 0.95em;
+    }
+
+    pre code {
+      display: block;
+    }
+
+    .tok-kw {
+      color: #6d28d9;
+      font-weight: 600;
+    }
+
+    .tok-str {
+      color: #0f766e;
+    }
+
+    .tok-num {
+      color: #b45309;
+    }
+
+    .tok-comment {
+      color: #6b7280;
+      font-style: italic;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .tok-kw {
+        color: #c4b5fd;
+      }
+
+      .tok-str {
+        color: #5eead4;
+      }
+
+      .tok-num {
+        color: #fbbf24;
+      }
+
+      .tok-comment {
+        color: #9ca3af;
+      }
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
@@ -55,6 +109,36 @@
       border: 1px solid rgba(127, 127, 127, 0.3);
       padding: 0.4rem 0.6rem;
       text-align: left;
+    }
+
+    a[href^="#ref-"] {
+      text-decoration: none;
+      border-bottom: 1px dotted currentColor;
+    }
+
+    .reference-popup {
+      position: fixed;
+      z-index: 999;
+      display: none;
+      max-width: min(560px, calc(100vw - 2rem));
+      max-height: min(300px, calc(100vh - 2rem));
+      overflow: auto;
+      padding: 0.75rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid rgba(127, 127, 127, 0.35);
+      background: color-mix(in srgb, canvas 92%, rgb(127 127 127 / 18%));
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+
+    .reference-popup p,
+    .reference-popup li {
+      margin: 0;
+    }
+
+    .reference-popup a {
+      overflow-wrap: anywhere;
     }
   </style>
 </head>
@@ -185,28 +269,26 @@
 <h4>Security considerations</h4>
 <p>The upmost care should be taken when navigating WebView2 to untrusted locations while also exposing VBA/COM host objects. In principle, any host objects could be utilised by a 3rd party attacker to extract data from an organisation. This means extra care must be put into defining the object models which untrusted websites are given access to.</p>
 <p>For example, if you are wanting to implement a feature where hyperlinks are launched when you click on a button in the webview do not use <code>Shell</code> function directly<a href="#ref-21" title="BleepingComputer: Windows 11 Notepad markdown links issue"><sup>[21]</sup></a> without any link sanitisation, or unless you generate the string inside your VBA environment.</p>
-<pre><code>&#39;DONT DO THIS:
-Public Sub OpenLink(ByVal link as string)
-  Call ThisWorkbook.FollowHyperlink(link)
-End Sub
+<pre><code class="language-vb"><span class="tok-comment">&#39;DONT DO THIS:</span>
+<span class="tok-kw">Public</span> <span class="tok-kw">Sub</span> OpenLink(<span class="tok-kw">ByVal</span> link <span class="tok-kw">as</span> string)
+  <span class="tok-kw">Call</span> ThisWorkbook.FollowHyperlink(link)
+<span class="tok-kw">End</span> <span class="tok-kw">Sub</span>
 
-&#39;DO THIS:
-Public Sub OpenLink(ByVal link as string)
+<span class="tok-comment">&#39;DO THIS:</span>
+<span class="tok-kw">Public</span> <span class="tok-kw">Sub</span> OpenLink(<span class="tok-kw">ByVal</span> link <span class="tok-kw">as</span> string)
   link = LCase(Trim(link))
-  if not InStr(1, link, &quot;https://my/site&quot;) = 1 then Err.Raise vbObjectError + 513, &quot;OpenLink&quot;, &quot;URL Blocked&quot;
-  Call ThisWorkbook.FollowHyperlink(link)
-End Sub
+  <span class="tok-kw">if</span> <span class="tok-kw">not</span> InStr(<span class="tok-num">1</span>, link, <span class="tok-str">&quot;https://my/site&quot;</span>) = <span class="tok-num">1</span> <span class="tok-kw">then</span> Err.Raise vbObjectError + <span class="tok-num">513</span>, <span class="tok-str">&quot;OpenLink&quot;</span>, <span class="tok-str">&quot;URL Blocked&quot;</span>
+  <span class="tok-kw">Call</span> ThisWorkbook.FollowHyperlink(link)
+<span class="tok-kw">End</span> <span class="tok-kw">Sub</span>
 
-&#39;Ideally do this:
-Public Sub OpenGoogleMaps(ByVal lat as Double, ByVal long as Double)
-  const url_template as string = &quot;https://maps.google.com?q={lat},{long}&quot;
-  Dim url as string: url = url_template
-  url = replace(url, &quot;{lat}&quot;, lat)
-  url = replace(url, &quot;{long}&quot;, long)
-  Call ThisWorkbook.FollowHyperlink(url)
-End Sub
-</code></pre>
-<p>An additional risk that needs to be considered is that of supply chain attacks, which occur when a third-party library included in your project (such as a JavaScript package) is compromised and used to deliver malicious code. To mitigate this risk, avoid loading assets directly from external CDNs or untrusted sources, and instead bundle required libraries locally and review their contents before deployment. Keep dependencies to a minimum and pin them to known, vetted versions. Regularly audit and update included packages, and never hand host objects directly to libraries without constraints. These steps help ensure that your VBA application remains secure even as it gains the power of modern web tooling.</p>
+<span class="tok-comment">&#39;Ideally do this:</span>
+<span class="tok-kw">Public</span> <span class="tok-kw">Sub</span> OpenGoogleMaps(<span class="tok-kw">ByVal</span> lat <span class="tok-kw">as</span> Double, <span class="tok-kw">ByVal</span> long <span class="tok-kw">as</span> Double)
+  <span class="tok-kw">const</span> url_template <span class="tok-kw">as</span> string = <span class="tok-str">&quot;https://maps.google.com?q={lat},{long}&quot;</span>
+  <span class="tok-kw">Dim</span> url <span class="tok-kw">as</span> string: url = url_template
+  url = replace(url, <span class="tok-str">&quot;{lat}&quot;</span>, lat)
+  url = replace(url, <span class="tok-str">&quot;{long}&quot;</span>, long)
+  <span class="tok-kw">Call</span> ThisWorkbook.FollowHyperlink(url)
+<span class="tok-kw">End</span> <span class="tok-kw">Sub</span></code></pre><p>An additional risk that needs to be considered is that of supply chain attacks, which occur when a third-party library included in your project (such as a JavaScript package) is compromised and used to deliver malicious code. To mitigate this risk, avoid loading assets directly from external CDNs or untrusted sources, and instead bundle required libraries locally and review their contents before deployment. Keep dependencies to a minimum and pin them to known, vetted versions. Regularly audit and update included packages, and never hand host objects directly to libraries without constraints. These steps help ensure that your VBA application remains secure even as it gains the power of modern web tooling.</p>
 <p>It is also important to limit/constrain VirtualHost to folder mappings. By creating a folder mapping you are exposing not only the folder, but all descendents of that folder to the webview. This combined with supply chain attacks, could bring serious risk of data leaks without developer prudence.</p>
 <p>All things considered, cyber security is a major consideration with this technology, and extra care should be untertaken in how you manage these security risks in your projects, so as to ensure data isn&#39;t leaked and your applications remain secure. The key take-aways are as follows:</p>
 <ul>
@@ -284,6 +366,132 @@ Search for: `’` and replace with `'`
     import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
     const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     mermaid.initialize({ startOnLoad: true, theme: isDark ? "dark" : "default" });
+  </script>
+  <script>
+    (() => {
+      const citations = Array.from(document.querySelectorAll('a[href^="#ref-"]'));
+      if (citations.length === 0) {
+        return;
+      }
+
+      const popup = document.createElement("aside");
+      popup.className = "reference-popup";
+      popup.setAttribute("role", "dialog");
+      popup.setAttribute("aria-live", "polite");
+      document.body.appendChild(popup);
+
+      let activeAnchor = null;
+      let hideTimer = null;
+
+      const cancelHide = () => {
+        if (hideTimer !== null) {
+          window.clearTimeout(hideTimer);
+          hideTimer = null;
+        }
+      };
+
+      const hidePopup = () => {
+        cancelHide();
+        popup.style.display = "none";
+        activeAnchor = null;
+      };
+
+      const scheduleHide = () => {
+        cancelHide();
+        hideTimer = window.setTimeout(() => {
+          hidePopup();
+        }, 100);
+      };
+
+      const positionPopup = (anchor) => {
+        const gap = 8;
+        const margin = 12;
+        const anchorRect = anchor.getBoundingClientRect();
+        const popupRect = popup.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        let left = anchorRect.left;
+        if (left + popupRect.width > viewportWidth - margin) {
+          left = viewportWidth - popupRect.width - margin;
+        }
+        left = Math.max(margin, left);
+
+        let top = anchorRect.bottom + gap;
+        if (top + popupRect.height > viewportHeight - margin) {
+          top = anchorRect.top - popupRect.height - gap;
+        }
+        top = Math.max(margin, top);
+
+        popup.style.left = left + "px";
+        popup.style.top = top + "px";
+      };
+
+      const getReferenceHtml = (anchor) => {
+        const rawHref = anchor.getAttribute("href");
+        if (!rawHref || !rawHref.startsWith("#")) {
+          return null;
+        }
+
+        const target = document.getElementById(rawHref.slice(1));
+        if (!target) {
+          return null;
+        }
+
+        const container = target.closest("li") ?? target.parentElement;
+        if (!container) {
+          return null;
+        }
+
+        const clone = container.cloneNode(true);
+        for (const idAnchor of clone.querySelectorAll('a[id^="ref-"]')) {
+          idAnchor.remove();
+        }
+        return clone.innerHTML.trim();
+      };
+
+      const showPopup = (anchor) => {
+        const html = getReferenceHtml(anchor);
+        if (!html) {
+          hidePopup();
+          return;
+        }
+
+        cancelHide();
+        activeAnchor = anchor;
+        popup.innerHTML = html;
+        popup.style.display = "block";
+        positionPopup(anchor);
+      };
+
+      popup.addEventListener("mouseenter", cancelHide);
+      popup.addEventListener("mouseleave", scheduleHide);
+
+      for (const anchor of citations) {
+        anchor.addEventListener("mouseenter", () => showPopup(anchor));
+        anchor.addEventListener("mouseleave", scheduleHide);
+        anchor.addEventListener("focus", () => showPopup(anchor));
+        anchor.addEventListener("blur", scheduleHide);
+      }
+
+      window.addEventListener("scroll", () => {
+        if (activeAnchor && popup.style.display === "block") {
+          positionPopup(activeAnchor);
+        }
+      }, { passive: true });
+
+      window.addEventListener("resize", () => {
+        if (activeAnchor && popup.style.display === "block") {
+          positionPopup(activeAnchor);
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          hidePopup();
+        }
+      });
+    })();
   </script>
 </body>
 </html>

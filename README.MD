@@ -201,7 +201,7 @@ The upmost care should be taken when navigating WebView2 to untrusted locations 
 
 For example, if you are wanting to implement a feature where hyperlinks are launched when you click on a button in the webview do not use `Shell` function directly[<sup>[21]</sup>](#ref-21 "BleepingComputer: Windows 11 Notepad markdown links issue") without any link sanitisation, or unless you generate the string inside your VBA environment.
 
-```
+```vb
 'DONT DO THIS:
 Public Sub OpenLink(ByVal link as string)
   Call ThisWorkbook.FollowHyperlink(link)
