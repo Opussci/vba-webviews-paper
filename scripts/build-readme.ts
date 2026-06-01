@@ -249,7 +249,9 @@ async function buildDocs(): Promise<void> {
       return (
         `<figure class="mermaid-figure">` +
         `<pre class="mermaid mermaid--screen">${diagramSource}</pre>` +
-        `<pre class="mermaid mermaid--print" aria-hidden="true">${diagramSource}</pre>` +
+        `<div class="mermaid-print-frame" aria-hidden="true">` +
+        `<pre class="mermaid mermaid--print">${diagramSource}</pre>` +
+        `</div>` +
         `</figure>`
       );
     }
@@ -269,6 +271,9 @@ async function buildDocs(): Promise<void> {
 
     const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const screenTheme = () => (colorSchemeQuery.matches ? "dark" : "default");
+    const MERMAID_PRINT_MAX_HEIGHT_MM = 1000;
+    const MERMAID_PRINT_MAX_WIDTH_MM = 800;
+    const mmToPx = (mm) => (mm * 96) / 25.4;
 
     function stashMermaidSource(nodes) {
       for (const node of nodes) {
@@ -309,8 +314,60 @@ async function buildDocs(): Promise<void> {
       await mermaid.run({ nodes, suppressErrors: true });
     }
 
+    function resetMermaidPrintFit() {
+      for (const frame of document.querySelectorAll(".mermaid-print-frame")) {
+        frame.style.height = "";
+        const pre = frame.querySelector("pre.mermaid--print");
+        if (pre) {
+          pre.style.transform = "";
+        }
+      }
+    }
+
+    function fitMermaidPrintFigures() {
+      const maxHeightPx = mmToPx(MERMAID_PRINT_MAX_HEIGHT_MM);
+      const maxWidthPx = mmToPx(MERMAID_PRINT_MAX_WIDTH_MM);
+
+      for (const frame of document.querySelectorAll(".mermaid-print-frame")) {
+        const pre = frame.querySelector("pre.mermaid--print");
+        const svg = pre?.querySelector("svg");
+        if (!pre || !svg) {
+          continue;
+        }
+
+        pre.style.transform = "";
+        frame.style.height = "";
+
+        const { width, height } = svg.getBoundingClientRect();
+        if (width === 0 || height === 0) {
+          continue;
+        }
+
+        const scale = Math.min(1, maxHeightPx / height, maxWidthPx / width);
+        if (scale < 1) {
+          pre.style.transform = \`scale(\${scale})\`;
+          pre.style.transformOrigin = "top center";
+          frame.style.height = \`\${height * scale}px\`;
+        }
+      }
+    }
+
+    async function prepareMermaidForPrint() {
+      await renderMermaidNodes("pre.mermaid--print", "default", { reset: true });
+      fitMermaidPrintFigures();
+    }
+
     await renderMermaidNodes("pre.mermaid--print", "default");
     await renderMermaidNodes("pre.mermaid--screen", screenTheme());
+    fitMermaidPrintFigures();
+
+    window.addEventListener("beforeprint", () => {
+      void prepareMermaidForPrint();
+    });
+
+    window.addEventListener("afterprint", () => {
+      resetMermaidPrintFit();
+    });
 
     colorSchemeQuery.addEventListener("change", () => {
       void renderMermaidNodes("pre.mermaid--screen", screenTheme(), { reset: true });
@@ -555,7 +612,17 @@ async function buildDocs(): Promise<void> {
     }
 
     pre.mermaid--print {
-      display: none;
+      width: 100%;
+    }
+
+    .mermaid-print-frame {
+      position: fixed;
+      left: -10000px;
+      top: 0;
+      width: min(980px, 100vw);
+      visibility: hidden;
+      pointer-events: none;
+      z-index: -1;
     }
 
     @media print {
@@ -563,8 +630,29 @@ async function buildDocs(): Promise<void> {
         display: none !important;
       }
 
+      .mermaid-figure {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .mermaid-print-frame {
+        position: static;
+        left: auto;
+        top: auto;
+        visibility: visible;
+        pointer-events: auto;
+        z-index: auto;
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
       pre.mermaid--print {
         display: block !important;
+        width: 100%;
       }
 
       .mermaid-figure svg {

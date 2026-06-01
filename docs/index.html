@@ -236,7 +236,17 @@
     }
 
     pre.mermaid--print {
-      display: none;
+      width: 100%;
+    }
+
+    .mermaid-print-frame {
+      position: fixed;
+      left: -10000px;
+      top: 0;
+      width: min(980px, 100vw);
+      visibility: hidden;
+      pointer-events: none;
+      z-index: -1;
     }
 
     @media print {
@@ -244,8 +254,29 @@
         display: none !important;
       }
 
+      .mermaid-figure {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .mermaid-print-frame {
+        position: static;
+        left: auto;
+        top: auto;
+        visibility: visible;
+        pointer-events: auto;
+        z-index: auto;
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
       pre.mermaid--print {
         display: block !important;
+        width: 100%;
       }
 
       .mermaid-figure svg {
@@ -388,7 +419,7 @@
         WV-&gt;&gt;VBA: Web resource callback
         VBA--&gt;&gt;WV: Complete / fail request
         WV--&gt;&gt;JS: Response to page
-    end</pre><pre class="mermaid mermaid--print" aria-hidden="true">sequenceDiagram
+    end</pre><div class="mermaid-print-frame" aria-hidden="true"><pre class="mermaid mermaid--print">sequenceDiagram
     participant VBA as VBA host
     participant UF as UserForm / Frame
     participant WV as WebView2
@@ -425,7 +456,7 @@
         WV-&gt;&gt;VBA: Web resource callback
         VBA--&gt;&gt;WV: Complete / fail request
         WV--&gt;&gt;JS: Response to page
-    end</pre></figure><h2>Case studies</h2>
+    end</pre></div></figure><h2>Case studies</h2>
 <h3>Geospatial map</h3>
 <p>Geospatial UI is one of the most complicated user interfaces to build from scratch and there are no existing geospatial map libraries for VBA, which don&#39;t also require installation from administrators. Reimplementing projections, tiling, layers, editing tools etc. is a lot of work and even if you managed to reimplement all of these tools, without folders to organise code in the VBA IDE any project you use this library in will quickly become a jumbled mess of classes for the GIS UI element and classes for the actual app/business logic, making implementation in pure VBA unfeasible.</p>
 <p>Web technologies, however, already have established packages for geospatial tools and UI elements e.g. Leaflet, Proj4, TurfJS, EsriJS...  Our first case study shows how a simple geospatial map element can be implemented within 200 lines of VBA using <code>stdWebView</code>. This demonstration shows how html can be injected into a webview, and adding a host object can be used to automated VBA from inside the web application.</p>
@@ -568,6 +599,9 @@
 
     const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const screenTheme = () => (colorSchemeQuery.matches ? "dark" : "default");
+    const MERMAID_PRINT_MAX_HEIGHT_MM = 1000;
+    const MERMAID_PRINT_MAX_WIDTH_MM = 900;
+    const mmToPx = (mm) => (mm * 96) / 25.4;
 
     function stashMermaidSource(nodes) {
       for (const node of nodes) {
@@ -608,8 +642,60 @@
       await mermaid.run({ nodes, suppressErrors: true });
     }
 
+    function resetMermaidPrintFit() {
+      for (const frame of document.querySelectorAll(".mermaid-print-frame")) {
+        frame.style.height = "";
+        const pre = frame.querySelector("pre.mermaid--print");
+        if (pre) {
+          pre.style.transform = "";
+        }
+      }
+    }
+
+    function fitMermaidPrintFigures() {
+      const maxHeightPx = mmToPx(MERMAID_PRINT_MAX_HEIGHT_MM);
+      const maxWidthPx = mmToPx(MERMAID_PRINT_MAX_WIDTH_MM);
+
+      for (const frame of document.querySelectorAll(".mermaid-print-frame")) {
+        const pre = frame.querySelector("pre.mermaid--print");
+        const svg = pre?.querySelector("svg");
+        if (!pre || !svg) {
+          continue;
+        }
+
+        pre.style.transform = "";
+        frame.style.height = "";
+
+        const { width, height } = svg.getBoundingClientRect();
+        if (width === 0 || height === 0) {
+          continue;
+        }
+
+        const scale = Math.min(1, maxHeightPx / height, maxWidthPx / width);
+        if (scale < 1) {
+          pre.style.transform = `scale(${scale})`;
+          pre.style.transformOrigin = "top center";
+          frame.style.height = `${height * scale}px`;
+        }
+      }
+    }
+
+    async function prepareMermaidForPrint() {
+      await renderMermaidNodes("pre.mermaid--print", "default", { reset: true });
+      fitMermaidPrintFigures();
+    }
+
     await renderMermaidNodes("pre.mermaid--print", "default");
     await renderMermaidNodes("pre.mermaid--screen", screenTheme());
+    fitMermaidPrintFigures();
+
+    window.addEventListener("beforeprint", () => {
+      void prepareMermaidForPrint();
+    });
+
+    window.addEventListener("afterprint", () => {
+      resetMermaidPrintFit();
+    });
 
     colorSchemeQuery.addEventListener("change", () => {
       void renderMermaidNodes("pre.mermaid--screen", screenTheme(), { reset: true });
