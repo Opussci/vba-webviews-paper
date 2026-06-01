@@ -14,7 +14,7 @@ The contribution is a pragmatic, engineering-focused methodology for teams that 
 
 ----
 
-## Motivation
+## Introduction
 
 VBA has seen little substantive evolution for decades[<sup>[9]</sup>](#ref-9 "Wikipedia: VBA version history")<sup>,</sup>[<sup>[10]</sup>](#ref-10 "Microsoft: Last major VBA update") and is often labeled a legacy technology. Yet it remains one of the most widely deployed languages in financial modelling, reporting, data processing, and operational automation across finance, manufacturing, logistics, and government[<sup>[1]</sup>](#ref-1 "Berger 2025")<sup>,</sup>[<sup>[2]</sup>](#ref-2 "Abisoye and Akerele 2021")<sup>,</sup>[<sup>[3]</sup>](#ref-3 "Agrrawal 2009")<sup>,</sup>[<sup>[4]</sup>](#ref-4 "Barbieri et al. 2024")<sup>,</sup>[<sup>[5]</sup>](#ref-5 "Feiman 2011")<sup>,</sup>[<sup>[6]</sup>](#ref-6 "Khan et al. 2021"). Its persistence follows from its ubiquity in Microsoft Office, tight alignment with spreadsheet workflows, and the cost and risk of replacing large macro codebases. Just as importantly, VBA confers an implicit local maintenance guarantee: domain teams can own their tools and adapt them quickly, which centralised platforms often fail to provide.
 
@@ -239,8 +239,6 @@ For additional guidance on how to keep `WebView2` applications secure, check out
 
 ## 5. Conclusion
 
-
-
 This paper has argued that embedding WebView2 in VBA is not simply a cosmetic upgrade to UserForms, but a practical architectural pattern for extending the lifespan and capability of systems built in Microsoft Office. `stdWebView` demonstrates that rich, modern interfaces can be integrated into existing Excel/VBA workflows while retaining VBA as the orchestration layer for data access, automation logic, and enterprise integration.
 
 Across the examples presented, the key value lies in establishing a repeatable bridge between VBA and web runtimes. With this approach, VBA drives the interface, JavaScript can call back into controlled host objects, and request interception enables modern programming patterns without the need for dedicated server infrastructure. This structure allows teams to modernize incrementally, upgrading the most fragile UI layers first and avoiding the need for wholesale migration.
@@ -271,38 +269,3 @@ The approach does introduce trade-offs, including a steeper cross-stack learning
 * <a id="ref-20"></a>[20] author: Leandro Ascierto. VBA resource file editor. https://leandroascierto.com/blog/vba-resource-file-editor/
 * <a id="ref-21"></a>[21] BleepingComputer. Windows 11 Notepad flaw let files execute silently via markdown links. https://www.bleepingcomputer.com/news/microsoft/windows-11-notepad-flaw-let-files-execute-silently-via-markdown-links/
 * <a id="ref-22"></a>[22] Microsoft Learn. WebView2 security guidance. https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/security?tabs=dotnetcsharp
-
-
-<!--
-
-## Dev Remarks:
-
-* TOADD: At OpenCL: It seems directX does have shaders:
-
-```c
-const char* src =
-    "float4 main() : SV_Target { return float4(1,0,0,1); }";
-
-ID3DBlob* code = NULL;
-ID3DBlob* errors = NULL;
-
-HRESULT hr = D3DCompile(
-    src,
-    strlen(src),
-    "inline",
-    NULL,
-    NULL,
-    "main",
-    "ps_5_0",
-    0,
-    0,
-    &code,
-    &errors
-);
-```
-
-
-
-
-Search for: `’` and replace with `'`
--->
