@@ -83,9 +83,12 @@ Web technologies, however, already have established packages for geospatial tool
 
 While `stdWebView` doesn't fix VBA project ergonomics, it moves the UI code which is hard in VBA, to HTML/JS providing significantly greater flexibility, and the ability to use custom libraries written by other developers. The VBA side ultimately becomes a bridge of bindings to the data model, rather than operating the whole vision.
 
-[Link to project](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/2.%20Geospatial%20Map)
+![Figure 1.1: Embedded geospatial UI in Excel using `stdWebView`, showing addition of points.](./case-studies/01-geospatial-map/still-1.png)
 
-![Geospatial Map Demo](./case-studies/01-geospatial-map/geospatial-demo.mp4)
+![Figure 1.2: Features added as GeoJSON to the spreadsheet.](./case-studies/01-geospatial-map/still-2.png)
+
+[[GitHubIcon] Geospatial map](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/2.%20Geospatial%20Map)
+[[VideoIcon] Watch geospatial demo](https://sancarn.github.io/vba-webviews-paper/case-studies/01-geospatial-map/geospatial-demo.mp4)
 
 ### List object viewer
 
@@ -93,9 +96,9 @@ One of the main reasons people build UserForms in VBA is to display and edit str
 
 Our list object viewer case study is a simple example of that: open a UserForm, step through rows in an Excel table, and a `stdWebView` panel shows that row's employee details plus the next steps linked to them. The same screen in pure VBA would be tedious to build, a headache to maintain and provide a poorer user experience.
 
-[Link to project](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/1.%20ListObjectViewer)
+![Figure 2.1: Upon changing selection, the row is rendered to the form. Including 1-to-many relationships.](./case-studies/02-list-object-viewer/loviewer-demo.gif)
 
-![List object demo](./case-studies/02-list-object-viewer/loviewer-demo.gif)
+[[GitHubIcon] List object viewer](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/1.%20ListObjectViewer)
 
 ### Customising existing organisation webapps
 
@@ -105,13 +108,15 @@ SharePoint is a typical example of this, with lists, files, and permissions that
 
 A `stdWebView` UserForm can sit in the gap. The user signs in to the real web app inside the control; you reuse that session (for example via cookies) to call the same APIs and pages the browser would, on their behalf. Or you skip deep integration and simply host a small HTML UI that wraps a narrow task with extra buttons, validation, or a wizard. These controls can be integrated into the host application, retaining the feeling like they're part of the tool they already use.
 
-[Link to project - sharepoint updator](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/4.%20Sharepoint%20Updator)
+![Figure 3.1: Using `stdWebView` to scrape authenticated session cookies for sharepoint.](./case-studies/03-existing-webapps/sharepoint-auth-window.png)
 
-![Sharepoint Updator](./case-studies/03-existing-webapps/sharepoint-auth-window.png)
+![Figure 3.2: Extending existing [pylon map](https://www.scribblemaps.com/maps/view/Pylon-Map-UK/olGrbyLDOr) with new functionality.](./case-studies/03-existing-webapps/still-1.png)
 
-[Link to project - pylon augmentation](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/6.%20Augment%20pylon%20map)
+![Figure 3.3: Domain-specific context menu added on top of the existing web application.](./case-studies/03-existing-webapps/still-2%20--%20custom%20context%20menu.png)
 
-![Powerline Example](./case-studies/03-existing-webapps/pylon-mapper.mp4)
+[[GitHubIcon] SharePoint updator](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/4.%20Sharepoint%20Updator)
+[[GitHubIcon] Pylon augmentation](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/6.%20Augment%20pylon%20map)
+[[VideoIcon] Watch pylon demo](https://sancarn.github.io/vba-webviews-paper/case-studies/03-existing-webapps/pylon-mapper.mp4)
 
 ### Data flows driven by node editors
 
@@ -121,9 +126,12 @@ Our pipeline editor case study shows how a webview could give users a low-code w
 
 That richer experience comes from using HTML5, CSS, and JavaScript libraries for the frontend while keeping data persistence, business logic, and side-effects in VBA via `stdWebView`'s interoperability layer. The result is a more approachable and maintainable way to build dataflows than would be practical with VBA forms alone.
 
-[Link to project](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/5.%20Data%20Pipelines)
+![Figure 4.1: Pipeline selection UI hosted inside `stdWebView`.](./case-studies/04-data-pipelines/still-0.png)
 
-![Pipelines editor](./case-studies/04-data-pipelines/pipeline-demo.mp4)
+![Figure 4.2: Low-code graph editor with searchable context-menu actions and expression tooling.](./case-studies/04-data-pipelines/still-comb-1.png)
+
+[[GitHubIcon] Pipeline editor](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/5.%20Data%20Pipelines)
+[[VideoIcon] Watch pipeline demo](https://sancarn.github.io/vba-webviews-paper/case-studies/04-data-pipelines/pipeline-demo.mp4)
 
 ### Benefits and trade-offs
 
