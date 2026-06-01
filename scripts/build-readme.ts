@@ -245,7 +245,13 @@ async function buildDocs(): Promise<void> {
 
     if (normalizedLang === "mermaid") {
       hasMermaidBlocks = true;
-      return `<pre class="mermaid">${escapeHtml(text)}</pre>`;
+      const diagramSource = escapeHtml(text);
+      return (
+        `<figure class="mermaid-figure">` +
+        `<pre class="mermaid mermaid--screen">${diagramSource}</pre>` +
+        `<pre class="mermaid mermaid--print" aria-hidden="true">${diagramSource}</pre>` +
+        `</figure>`
+      );
     }
 
     if (normalizedLang === "vb" || normalizedLang === "vba" || normalizedLang === "vbscript") {
@@ -260,8 +266,55 @@ async function buildDocs(): Promise<void> {
     ? `
   <script type="module">
     import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-    const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    mermaid.initialize({ startOnLoad: true, theme: isDark ? "dark" : "default" });
+
+    const colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const screenTheme = () => (colorSchemeQuery.matches ? "dark" : "default");
+
+    function stashMermaidSource(nodes) {
+      for (const node of nodes) {
+        if (!node.dataset.mermaidSource) {
+          node.dataset.mermaidSource = node.textContent.trim();
+        }
+      }
+    }
+
+    function restoreMermaidSource(nodes) {
+      for (const node of nodes) {
+        const source = node.dataset.mermaidSource;
+        if (!source) {
+          continue;
+        }
+        node.removeAttribute("data-processed");
+        node.innerHTML = source;
+      }
+    }
+
+    async function renderMermaidNodes(selector, theme, { reset = false } = {}) {
+      const nodes = Array.from(document.querySelectorAll(selector));
+      if (nodes.length === 0) {
+        return;
+      }
+
+      stashMermaidSource(nodes);
+      if (reset) {
+        restoreMermaidSource(nodes);
+      }
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme,
+        deterministicIds: true,
+        deterministicIDSeed: selector
+      });
+      await mermaid.run({ nodes, suppressErrors: true });
+    }
+
+    await renderMermaidNodes("pre.mermaid--print", "default");
+    await renderMermaidNodes("pre.mermaid--screen", screenTheme());
+
+    colorSchemeQuery.addEventListener("change", () => {
+      void renderMermaidNodes("pre.mermaid--screen", screenTheme(), { reset: true });
+    });
   </script>`
     : "";
   const fullHtml = `<!doctype html>
@@ -273,6 +326,103 @@ async function buildDocs(): Promise<void> {
   <style>
     :root {
       color-scheme: light dark;
+      --bg: #ffffff;
+      --text: #1f2328;
+      --text-muted: #656d76;
+      --link: #0969da;
+      --link-hover: #0550ae;
+      --surface-muted: rgba(175, 184, 193, 0.2);
+      --surface-muted-hover: rgba(175, 184, 193, 0.35);
+      --border: rgba(175, 184, 193, 0.45);
+      --border-strong: rgba(175, 184, 193, 0.65);
+      --pre-bg: #f6f8fa;
+      --popup-bg: #ffffff;
+      --popup-shadow: rgba(31, 35, 40, 0.12);
+      --focus-ring: #0969da;
+      --link-button-github-border: rgba(9, 105, 218, 0.45);
+      --link-button-video-border: rgba(207, 34, 46, 0.45);
+      --tok-kw: #6d28d9;
+      --tok-str: #0f766e;
+      --tok-num: #b45309;
+      --tok-comment: #6b7280;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: rgb(25, 29, 34);
+        --text: #e6edf3;
+        --text-muted: #9ca3af;
+        --link: #7cc7ff;
+        --link-hover: #a8daff;
+        --surface-muted: rgba(127, 127, 127, 0.12);
+        --surface-muted-hover: rgba(127, 127, 127, 0.2);
+        --border: rgba(127, 127, 127, 0.38);
+        --border-strong: rgba(127, 127, 127, 0.58);
+        --pre-bg: rgba(127, 127, 127, 0.12);
+        --popup-bg: color-mix(in srgb, canvas 92%, rgb(127 127 127 / 18%));
+        --popup-shadow: rgba(0, 0, 0, 0.24);
+        --focus-ring: #7cc7ff;
+        --link-button-github-border: rgba(147, 197, 253, 0.5);
+        --link-button-video-border: rgba(248, 113, 113, 0.5);
+        --tok-kw: #c4b5fd;
+        --tok-str: #5eead4;
+        --tok-num: #fbbf24;
+        --tok-comment: #9ca3af;
+      }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+        --bg: #ffffff;
+        --text: #1f2328;
+        --text-muted: #656d76;
+        --link: #0969da;
+        --link-hover: #0550ae;
+        --surface-muted: #f6f8fa;
+        --surface-muted-hover: #eef1f4;
+        --border: #d0d7de;
+        --border-strong: #afb8c1;
+        --pre-bg: #f6f8fa;
+        --popup-bg: #ffffff;
+        --popup-shadow: transparent;
+        --focus-ring: #0969da;
+        --link-button-github-border: #96c3ff;
+        --link-button-video-border: #ffaba8;
+        --tok-kw: #6d28d9;
+        --tok-str: #0f766e;
+        --tok-num: #b45309;
+        --tok-comment: #6b7280;
+      }
+
+      body {
+        padding: 0;
+      }
+
+      a {
+        color: var(--link) !important;
+      }
+
+      pre,
+      :not(pre) > code {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .reference-popup,
+      video {
+        display: none !important;
+      }
+
+      figure:has(video)::after {
+        content: "Video omitted in print — open the HTML version to watch.";
+        display: block;
+        margin-top: 0.45rem;
+        font-size: 0.95rem;
+        font-style: italic;
+        text-align: center;
+        color: var(--text-muted);
+      }
     }
 
     body {
@@ -280,12 +430,16 @@ async function buildDocs(): Promise<void> {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.6;
       padding: 2rem 1rem;
-      background:rgb(25, 29, 34);
-      color: #e6edf3;
+      background: var(--bg);
+      color: var(--text);
     }
 
     a {
-      color: #7cc7ff;
+      color: var(--link);
+    }
+
+    a:hover {
+      color: var(--link-hover);
     }
 
     .link-button {
@@ -295,8 +449,8 @@ async function buildDocs(): Promise<void> {
       padding: 0.35rem 0.62rem;
       margin: 0.18rem 0.25rem 0.18rem 0;
       border-radius: 999px;
-      border: 1px solid rgba(127, 127, 127, 0.38);
-      background: rgba(127, 127, 127, 0.12);
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
       color: inherit;
       text-decoration: none;
       font-size: 0.92rem;
@@ -305,12 +459,12 @@ async function buildDocs(): Promise<void> {
     }
 
     .link-button:hover {
-      background: rgba(127, 127, 127, 0.2);
-      border-color: rgba(127, 127, 127, 0.58);
+      background: var(--surface-muted-hover);
+      border-color: var(--border-strong);
     }
 
     .link-button:focus-visible {
-      outline: 2px solid #7cc7ff;
+      outline: 2px solid var(--focus-ring);
       outline-offset: 2px;
     }
 
@@ -341,11 +495,11 @@ async function buildDocs(): Promise<void> {
     }
 
     .link-button--github {
-      border-color: rgba(147, 197, 253, 0.5);
+      border-color: var(--link-button-github-border);
     }
 
     .link-button--video {
-      border-color: rgba(248, 113, 113, 0.5);
+      border-color: var(--link-button-video-border);
     }
 
     main {
@@ -371,21 +525,52 @@ async function buildDocs(): Promise<void> {
       font-size: 0.95rem;
       font-style: italic;
       text-align: center;
-      color: color-mix(in srgb, currentColor 84%, rgb(127 127 127 / 45%));
+      color: var(--text-muted);
     }
 
     pre {
       overflow-x: auto;
       padding: 1rem;
       border-radius: 8px;
-      background: rgba(127, 127, 127, 0.12);
+      background: var(--pre-bg);
+      border: 1px solid var(--border);
+    }
+
+    .mermaid-figure {
+      margin: 1.1rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
     }
 
     pre.mermaid {
       padding: 0;
+      margin: 0;
       background: transparent;
+      border: none;
       border-radius: 0;
       overflow: visible;
+      width: 100%;
+    }
+
+    pre.mermaid--print {
+      display: none;
+    }
+
+    @media print {
+      pre.mermaid--screen {
+        display: none !important;
+      }
+
+      pre.mermaid--print {
+        display: block !important;
+      }
+
+      .mermaid-figure svg {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
     }
 
     code {
@@ -395,8 +580,8 @@ async function buildDocs(): Promise<void> {
     :not(pre) > code {
       padding: 0.14rem 0.36rem;
       border-radius: 6px;
-      border: 1px solid rgba(127, 127, 127, 0.35);
-      background: rgba(127, 127, 127, 0.18);
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
       font-size: 0.95em;
     }
 
@@ -405,39 +590,21 @@ async function buildDocs(): Promise<void> {
     }
 
     .tok-kw {
-      color: #6d28d9;
+      color: var(--tok-kw);
       font-weight: 600;
     }
 
     .tok-str {
-      color: #0f766e;
+      color: var(--tok-str);
     }
 
     .tok-num {
-      color: #b45309;
+      color: var(--tok-num);
     }
 
     .tok-comment {
-      color: #6b7280;
+      color: var(--tok-comment);
       font-style: italic;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .tok-kw {
-        color: #c4b5fd;
-      }
-
-      .tok-str {
-        color: #5eead4;
-      }
-
-      .tok-num {
-        color: #fbbf24;
-      }
-
-      .tok-comment {
-        color: #9ca3af;
-      }
     }
 
     table {
@@ -447,7 +614,7 @@ async function buildDocs(): Promise<void> {
 
     th,
     td {
-      border: 1px solid rgba(127, 127, 127, 0.3);
+      border: 1px solid var(--border);
       padding: 0.4rem 0.6rem;
       text-align: left;
     }
@@ -466,9 +633,10 @@ async function buildDocs(): Promise<void> {
       overflow: auto;
       padding: 0.75rem 0.9rem;
       border-radius: 8px;
-      border: 1px solid rgba(127, 127, 127, 0.35);
-      background: color-mix(in srgb, canvas 92%, rgb(127 127 127 / 18%));
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
+      border: 1px solid var(--border);
+      background: var(--popup-bg);
+      color: var(--text);
+      box-shadow: 0 10px 28px var(--popup-shadow);
       font-size: 0.94rem;
       line-height: 1.45;
     }
