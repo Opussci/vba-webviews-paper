@@ -191,9 +191,7 @@ Additionally, many JavaScript ecosystem tools rely on build pipelines and framew
 
 ---
 
-## 6. Technical Design of `stdWebView`
-
-### 6.1 Dependency-Free Design
+### 5.2 Dependency-Free Design
 
 `stdWebView` creates an instance of WebView2 using a pre-installed `WebView2Loader.dll`, found in `C:\Program Files\Microsoft Office\root\Office16\ADDINS\Microsoft Power Query for Excel Integrated\bin`, which is included with Microsoft Excel as part of its PowerQuery integration. This approach, originally discovered by VBA developer tarboh[<sup>[14]</sup>](#ref-14 "tarboh: WebView2 For Excel VBA"), enables the creation of a WebView2 instance without needing to install additional type libraries or binaries — an action that would typically require administrator rights.
 
@@ -201,7 +199,7 @@ To bypass the requirement for a registered type library, tarboh uses `DispCallFu
 
 Where `stdWebView` diverts from Tarboh's approach is by introducing a Win64 port of an x86 thunk, used to create pointers to class public instance methods. This makes the vision of a dependency-free, self-contained `stdWebView` a reality — the entire module can be dropped into any project without extra setup.
 
-### 6.2 Late-Bound COM Interop
+### 5.3 Late-Bound COM Interop
 
 WebView2 exposes its native API through COM interfaces and asynchronous callbacks. VBA does not provide a convenient way to implement arbitrary WebView2 callback interfaces or expose raw function pointers for instance methods. `stdWebView` therefore needs an interop layer that can both call WebView2 methods and present VBA methods as callback targets.
 
@@ -224,7 +222,7 @@ ObjPtr(o) --> [IUnknown::QueryInterface]
 
 > Internally, the VB runtime maintains additional metadata immediately adjacent to the vtable (used for private members and other bookkeeping), but that is unrelated to this mechanism and not used here.
 
-### 6.3 Adapting VBA Methods into Native Callbacks
+### 5.4 Adapting VBA Methods into Native Callbacks
 
 With a known pointer size, we can compute the address of the N-th public method directly. However, object methods expect a `this` pointer, while a typical C callback jumps directly to a bare function address.
 
@@ -232,13 +230,13 @@ To reconcile the two calling conventions, a small thunk is generated — a short
 
 The implementation also introduces EBMode protection, inspired by the work of TheTrick[<sup>[18]</sup>](#ref-18 "TheTrick: VbTrickTimer"), which extends Elroy's original thunk by detecting when the VBA IDE is in break mode and suppresses callback execution to avoid Office application crashes.
 
-### 6.4 Invoking VBA from JavaScript
+### 5.5 Invoking VBA from JavaScript
 
 Direct calls from JavaScript to VBA are achieved by utilising the standard WebView2 API's host-object functionality. Any object that implements `IDispatch` — including all VBA objects — can serve as a host object. This allows you to expose any VBA class or object to JavaScript by registering it, enabling JavaScript code to call into VBA through that object.
 
 `stdWebView` has one minor dependency on `stdICallable`. While any dependency is not ideal, `stdICallable` is the key component enabling integration with the broader `stdVBA` ecosystem. Callback support in `stdWebView` is optional but, when needed, works seamlessly with standard `stdLambda` or `stdCallback` objects.
 
-### 6.5 Considerations
+### 5.6 Considerations
 
 `stdWebView` is only compatible with Windows OS. In principle, a similar class could be designed for macOS with SafariView or WKWebView, but such an implementation would need a different architecture, as macOS lacks the COM infrastructure and executable memory model that `stdWebView` relies on.
 
@@ -248,7 +246,7 @@ Unless the HTML application is stored in a centralised remote drive accessible t
 
 An alternative approach is to store the entire HTML application in the zipped `xlsm` binary, unzipping it to a temporary directory at runtime and configuring a hostname-to-folder mapping at initialisation. Care must be taken to update `[Content_Types].xml` with all extensions used in the application payload to avoid Excel corruption errors[<sup>[20]</sup>](#ref-20 "Leandro Ascierto: VBA resource file editor").
 
-### 6.6 Security Considerations
+### 5.7 Security Considerations
 
 The **utmost** care should be taken when navigating WebView2 to untrusted locations while also exposing VBA/COM host objects. In principle, any host object could be exploited by a third-party attacker to extract data from an organisation. Extra care must be taken in defining the object models to which untrusted websites are given access.
 
@@ -300,7 +298,7 @@ For additional guidance, consult the Microsoft WebView2 security documentation[<
 
 ---
 
-## 7. Conclusion
+## 6. Conclusion
 
 This paper has argued that embedding WebView2 in VBA is not simply a cosmetic upgrade to UserForms but a practical architectural pattern for extending the lifespan and capability of systems built in Microsoft Office and that this argument is particularly compelling in chemical process engineering, food manufacturing, and environmental monitoring, where Excel-VBA has become structurally embedded in operational practice in ways that make full platform replacement both costly and operationally risky.
 
