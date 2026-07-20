@@ -127,7 +127,7 @@ Web technologies already have established packages for geospatial tools and UI e
 
 [[GitHub] Geospatial map](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/2.%20Geospatial%20Map) · [[Video] Watch geospatial demo](https://sancarn.github.io/vba-webviews-paper/case-studies/01-geospatial-map/geospatial-demo.mp4)
 
-**Domain relevance.** In environmental engineering, this pattern directly supports field sampling-site management, pollution-source mapping, pipeline inspection dashboards, and real-time sensor overlay on web GIS layers — workflows documented in web-based environmental monitoring platforms[<sup>[26]</sup>](#ref-26 "Gong 2015"). In infrastructure operations, the pylon-map augmentation variant (Case Study 4.3) demonstrates the same capability for asset-condition recording by field teams operating under regulatory inspection schedules.
+In environmental engineering, this pattern directly supports field sampling-site management, pollution-source mapping, pipeline inspection dashboards, and real-time sensor overlay on web GIS layers — workflows documented in web-based environmental monitoring platforms[<sup>[26]</sup>](#ref-26 "Gong 2015"). In infrastructure operations, the pylon-map augmentation variant (Case Study 4.3) demonstrates the same capability for asset-condition recording by field teams operating under regulatory inspection schedules.
 
 ---
 
@@ -141,7 +141,7 @@ This case study is a simple example: open a UserForm, step through rows in an Ex
 
 [[GitHub] List object viewer](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/1.%20ListObjectViewer)
 
-**Domain relevance.** In food quality control and analytical laboratories, this pattern maps directly to LIMS record-review interfaces, where a technician steps through sample rows and views linked test results, batch metadata, and non-conformance notes in a dynamically rendered panel. The same approach applies to ingredient traceability workflows in HACCP-governed processes, where a batch record links to multiple supplier certificates, audit logs, and corrective action records — a layout trivial in HTML/CSS but laborious to build and maintain in native VBA controls.
+In food quality control and analytical laboratories, this pattern maps directly to LIMS record-review interfaces, where a technician steps through sample rows and views linked test results, batch metadata, and non-conformance notes in a dynamically rendered panel. The same approach applies to ingredient traceability workflows in HACCP-governed processes, where a batch record links to multiple supplier certificates, audit logs, and corrective action records — a layout trivial in HTML/CSS but laborious to build and maintain in native VBA controls.
 
 ---
 
@@ -161,7 +161,7 @@ A `stdWebView` UserForm can sit in the gap. The user signs in to the real web ap
 
 [[GitHub] SharePoint updater](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/4.%20Sharepoint%20Updator) · [[GitHub] Pylon augmentation](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/6.%20Augment%20pylon%20map) · [[Video] Watch pylon demo](https://sancarn.github.io/vba-webviews-paper/case-studies/03-existing-webapps/pylon-mapper.mp4)
 
-**Domain relevance.** For food manufacturers and chemical plants operating under ISO 22000 or ISO/IEC 17025, SharePoint is a common document-control backbone. This pattern enables domain teams to build wizard-style non-conformance reporting or deviation-approval workflows on top of SharePoint without requiring IT intervention or modification of the base platform. The same approach applies to procurement and supplier qualification workflows in regulated manufacturing, where forms must enforce structured data entry but the underlying platform cannot be customised by the domain team.
+For food manufacturers and chemical plants operating under ISO 22000 or ISO/IEC 17025, SharePoint is a common document-control backbone. This pattern enables domain teams to build wizard-style non-conformance reporting or deviation-approval workflows on top of SharePoint without requiring IT intervention or modification of the base platform. The same approach applies to procurement and supplier qualification workflows in regulated manufacturing, where forms must enforce structured data entry but the underlying platform cannot be customised by the domain team.
 
 ---
 
@@ -177,7 +177,7 @@ This case study shows how a WebView can give users a low-code way to build data 
 
 [[GitHub] Pipeline editor](https://github.com/sancarn/stdVBA-examples/tree/main/Examples/WebView/5.%20Data%20Pipelines) · [[Video] Watch pipeline demo](https://sancarn.github.io/vba-webviews-paper/case-studies/04-data-pipelines/pipeline-demo.mp4)
 
-**Domain relevance.** In chemical process engineering, this node-editor pattern directly supports visual process-flow diagram construction and the representation of mass-balance models. An engineer can sketch a unit-operation network visually, with connections persisted to Excel ranges that feed into an Aspen HYSYS or Aspen Plus automation script via the standard Excel-VBA COM interop bridge[<sup>[24]</sup>](#ref-24 "Bartolomé 2022"). In food manufacturing, the same pattern enables low-code ETL pipeline authoring for production data feeds from line sensors to reporting templates, without requiring Python or database skills from the process engineer.
+In chemical process engineering, this node-editor pattern directly supports visual process-flow diagram construction and the representation of mass-balance models. An engineer can sketch a unit-operation network visually, with connections persisted to Excel ranges that feed into an Aspen HYSYS or Aspen Plus automation script via the standard Excel-VBA COM interop bridge[<sup>[24]</sup>](#ref-24 "Bartolomé 2022"). In food manufacturing, the same pattern enables low-code ETL pipeline authoring for production data feeds from line sensors to reporting templates, without requiring Python or database skills from the process engineer.
 
 ---
 
@@ -187,7 +187,7 @@ This case study shows how a WebView can give users a low-code way to build data 
 
 Using WebView UserForms opens up a world of sophisticated UI features and access to the powerful ecosystem of modern JavaScript libraries, but this flexibility comes with a new set of complexities. Instead of spending most of your time on laborious VBA UserForm layouts, you are now navigating asynchronous JavaScript, cross-language communication, and the quirks of both JS/HTML/CSS and native VBA code. Debugging can become more involved and there are new deployment considerations, from ensuring that WebView2 is present to managing security boundaries in mixed web/native applications.
 
-Additionally, many JavaScript ecosystem tools rely on build pipelines and frameworks (Webpack, Vite, React, etc.), introducing more options, abstractions, and dependencies into the development process. For some VBA developers, the simplicity and constraint of native VBA components might be preferable.
+Additionally, many JavaScript ecosystem tools rely on build pipelines and frameworks (Webpack, Vite, React, etc.), introducing more options, abstractions, and dependencies into the development process. For some VBA developers, the simplicity and constraints of native VBA components might be preferable.
 
 ---
 
@@ -199,7 +199,7 @@ Additionally, many JavaScript ecosystem tools rely on build pipelines and framew
 
 To bypass the requirement for a registered type library, tarboh uses `DispCallFunc` from `OleAut32.dll`[<sup>[15]</sup>](#ref-15 "sancarn: stdCOM.cls")<sup>,</sup>[<sup>[16]</sup>](#ref-16 "vbForums: VB6 Call Functions By Pointer") to invoke methods directly via their vtable pointers and function offsets, effectively emulating the way C code calls COM object members. This provides late-bound, vtable-driven COM interop from VBA with no external dependencies beyond those already shipped with Office.
 
-Where `stdWebView` diverts from tarboh's approach is by introducing a Win64 port of an x86 thunk, used to create pointers to class public instance methods. This makes the vision of a dependency-free, self-contained `stdWebView` a reality — the entire module can be dropped into any project without extra setup.
+Where `stdWebView` diverts from Tarboh's approach is by introducing a Win64 port of an x86 thunk, used to create pointers to class public instance methods. This makes the vision of a dependency-free, self-contained `stdWebView` a reality — the entire module can be dropped into any project without extra setup.
 
 ### 6.2 Late-Bound COM Interop
 
@@ -237,8 +237,6 @@ The implementation also introduces EBMode protection, inspired by the work of Th
 Direct calls from JavaScript to VBA are achieved by utilising the standard WebView2 API's host-object functionality. Any object that implements `IDispatch` — including all VBA objects — can serve as a host object. This allows you to expose any VBA class or object to JavaScript by registering it, enabling JavaScript code to call into VBA through that object.
 
 `stdWebView` has one minor dependency on `stdICallable`. While any dependency is not ideal, `stdICallable` is the key component enabling integration with the broader `stdVBA` ecosystem. Callback support in `stdWebView` is optional but, when needed, works seamlessly with standard `stdLambda` or `stdCallback` objects.
-
-> **[Author action required — m5]:** Please add a formal citation or URL for `stdICallable` here, e.g. `https://github.com/sancarn/stdVBA`, so readers can locate the dependency.
 
 ### 6.5 Considerations
 
@@ -304,7 +302,7 @@ For additional guidance, consult the Microsoft WebView2 security documentation[<
 
 ## 7. Conclusion
 
-This paper has argued that embedding WebView2 in VBA is not simply a cosmetic upgrade to UserForms but a practical architectural pattern for extending the lifespan and capability of systems built in Microsoft Office — and that this argument is particularly compelling in chemical process engineering, food manufacturing, and environmental monitoring, where Excel-VBA has become structurally embedded in operational practice in ways that make full platform replacement both costly and operationally risky.
+This paper has argued that embedding WebView2 in VBA is not simply a cosmetic upgrade to UserForms but a practical architectural pattern for extending the lifespan and capability of systems built in Microsoft Office and that this argument is particularly compelling in chemical process engineering, food manufacturing, and environmental monitoring, where Excel-VBA has become structurally embedded in operational practice in ways that make full platform replacement both costly and operationally risky.
 
 In chemical process engineering, VBA persists as the canonical orchestration layer between process simulators such as Aspen HYSYS and Aspen Plus and the analyst's reporting, optimisation, and decision-support workflows. In food manufacturing, it underpins LIMS-adjacent quality control pipelines, batch traceability records, and ISO 22000 and ISO/IEC 17025 compliance workflows that domain teams own and maintain directly without dependence on centralised IT. In environmental monitoring, it anchors the spreadsheet-based data collection and spatial reporting workflows through which field teams record sampling events, track regulatory compliance, and manage asset inspections. In all three domains, the common constraint is identical: the data already lives in Excel, the business logic already lives in VBA, and the cost and disruption of full migration to a standalone web application cannot be justified against the scale of the individual tool.
 
