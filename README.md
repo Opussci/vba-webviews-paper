@@ -64,11 +64,8 @@ The combined picture is consistent: food and analytical laboratories at all scal
 
 ## 3. Architecture and API Design of `stdWebView`
 
-`stdWebView` exposes a small VBA API for embedding WebView2 into native UserForms and offers communication mechanisms to allow transfer of data and commands between the VBA and JavaScript runtime environments[<sup>[19]</sup>](#ref-19 "Microsoft: WebView2 NuGet package"). Typical usage involves attaching the WebView to a `MSForms.UserForm` or `MSForms.Frame`, navigating to sites or injecting HTML/CSS/JS, and either hijacking the web-request system to serve pages and data requests like a regular HTTP server or injecting a host COM object which JavaScript can automate directly.
+`stdWebView` exposes a small VBA API for embedding WebView2 into native UserForms and offers communication mechanisms to allow transfer of data and commands between the VBA and JavaScript runtime environments[<sup>[19]</sup>](#ref-19 "Microsoft: WebView2 NuGet package"). Typical usage involves attaching the WebView to a `MSForms.UserForm` or `MSForms.Frame`, navigating to sites or injecting HTML/CSS/JS, and either hijacking the web-request system to serve pages and data requests like a regular HTTP server or injecting a host COM object which JavaScript can automate directly. Figure 1 below shows an overview of the initialisation sequence and the three communication modes.
 
-**Figure 1** below shows an overview of the initialisation sequence and the three communication modes.
-
-**Figure 1:** Sequence diagram of `stdWebView` initialisation and VBA–JavaScript communication modes.
 
 ```mermaid
 sequenceDiagram
@@ -110,7 +107,7 @@ sequenceDiagram
         WV-->>JS: Response to page
     end
 ```
-
+**Figure 1:** Sequence diagram of `stdWebView` initialisation and VBA–JavaScript communication modes.
 ---
 
 ## 4. Case Studies
