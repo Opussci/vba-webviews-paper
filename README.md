@@ -70,7 +70,7 @@ The combined picture is consistent: food and analytical laboratories at all scal
 
 **Figure 1:** Sequence diagram of `stdWebView` initialisation and VBA–JavaScript communication modes.
 
-```
+```mermaid
 sequenceDiagram
     participant VBA as VBA host
     participant UF as UserForm / Frame
